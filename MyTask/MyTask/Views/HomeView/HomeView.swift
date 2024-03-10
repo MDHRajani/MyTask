@@ -31,6 +31,8 @@ struct HomeView: View {
     @State private var showAddTaskView: Bool = false
     @State private var showTaskDetailView: Bool = false
     @State private var selectedTask: Task = Task(id: 0, name: "test", description: "test", finishDate: Date(), isCompleted: false)
+    @State private var refreshTaskList: Bool = false
+    
     
     var body: some View {
         NavigationStack {
@@ -62,6 +64,14 @@ struct HomeView: View {
             }.onAppear {
                 taskViewModel.getTask(isActive: true)
             }
+            .onChange(of: refreshTaskList, perform: { _ in
+                taskViewModel.getTask(isActive: defaultSelectedPickerItem == TodoFilters.isActive.title)
+            })
+            
+//            .onChange(of: refreshTaskList, { _, _ in
+//                taskViewModel.getTask(isActive: true)
+//            })
+            
             .listStyle(.plain)
             .navigationTitle("Home")
             .toolbar(content: {
@@ -74,13 +84,15 @@ struct HomeView: View {
                 }
             })
             .sheet(isPresented: $showAddTaskView, content: {
-                AddTaskView(viewModel: TaskViewModel(),
-                            showAddTaskView: $showAddTaskView)
+                AddTaskView(viewModel: taskViewModel,
+                            showAddTaskView: $showAddTaskView,
+                            refreshTaskList: $refreshTaskList)
             })
             .sheet(isPresented: $showTaskDetailView, content: {
                 TaskDetailView(viewModel: taskViewModel,
                                showTaskDetailView: $showTaskDetailView,
-                               selectedTask: $selectedTask)
+                               selectedTask: $selectedTask, 
+                               refreshTaskList: $refreshTaskList)
             })
         }
     }
