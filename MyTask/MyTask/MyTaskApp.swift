@@ -12,7 +12,7 @@ struct MyTaskApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HyperlinkDemo()
+            HomeView()
         }
     }
 }
