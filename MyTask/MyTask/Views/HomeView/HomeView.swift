@@ -25,12 +25,12 @@ extension TodoFilters {
 
 struct HomeView: View {
     
-    @StateObject var taskViewModel: TaskViewModel = TaskViewModel()
+    @StateObject var taskViewModel: TaskViewModel = TaskViewModelFactory.createTaskViewModelFactory()
     @State private var pickerFilters = TodoFilters.allCases
     @State private var defaultSelectedPickerItem = TodoFilters.isActive.title
     @State private var showAddTaskView: Bool = false
     @State private var showTaskDetailView: Bool = false
-    @State private var selectedTask: Task = Task(id: 0, name: "test", description: "test", finishDate: Date(), isCompleted: false)
+    @State private var selectedTask: Task = Task.createEmptyTask()
     @State private var refreshTaskList: Bool = false
     
     
@@ -44,7 +44,7 @@ struct HomeView: View {
             }
             .pickerStyle(.segmented)
             .onChange(of: defaultSelectedPickerItem) {
-                taskViewModel.getTask(isActive: defaultSelectedPickerItem == TodoFilters.isActive.title)
+                taskViewModel.getTask(isCompleted: defaultSelectedPickerItem == TodoFilters.isActive.title)
             }
             
             List(taskViewModel.tasks, id: \.id) { task in
@@ -62,10 +62,10 @@ struct HomeView: View {
                     showTaskDetailView.toggle()
                 }
             }.onAppear {
-                taskViewModel.getTask(isActive: true)
+                taskViewModel.getTask(isCompleted: true)
             }
             .onChange(of: refreshTaskList, perform: { _ in
-                taskViewModel.getTask(isActive: defaultSelectedPickerItem == TodoFilters.isActive.title)
+                taskViewModel.getTask(isCompleted: defaultSelectedPickerItem == TodoFilters.isActive.title)
             })
             
 //            .onChange(of: refreshTaskList, { _, _ in

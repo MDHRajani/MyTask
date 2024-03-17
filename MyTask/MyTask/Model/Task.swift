@@ -8,15 +8,13 @@
 import Foundation
 
 struct Task {
-    let id: Int
+    let id: UUID
     var name: String
     var description: String
     var finishDate: Date
     var isCompleted: Bool
     
-    static func createMockTasks() -> [Task] {
-        return [Task(id: 1, name: "go to gym", description: "back workout", finishDate: Date(), isCompleted: false),
-                Task(id: 2, name: "car wash", description: "carzz care", finishDate: Date(), isCompleted: false),
-                 Task(id: 3, name: "Office work", description: "PR reviews", finishDate: Date(), isCompleted: true)]
+    static func createEmptyTask() -> Task {
+        return Task(id: UUID(), name: "", description: "", finishDate: Date(), isCompleted: false)
     }
 }

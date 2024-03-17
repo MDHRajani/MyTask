@@ -10,9 +10,17 @@ import SwiftUI
 struct AddTaskView: View {
     
     @ObservedObject var viewModel: TaskViewModel
-    @State private var newTask: Task = Task(id: 0, name: "", description: "", finishDate: Date(), isCompleted: true)
+    @State private var newTask: Task = Task.createEmptyTask()
     @Binding var showAddTaskView: Bool
     @Binding var refreshTaskList: Bool
+    @State private var shouldShowDirtyCheckAlert: Bool = false
+    
+    fileprivate func addTask() {
+        if (viewModel.addNewTask(task: newTask)) {
+            showAddTaskView.toggle()
+            refreshTaskList.toggle()
+        }
+    }
     
     var body: some View {
         NavigationStack {
@@ -34,10 +42,29 @@ struct AddTaskView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
-                        showAddTaskView.toggle()
+                        if !newTask.name.isEmpty {
+                            shouldShowDirtyCheckAlert.toggle()
+                        } else {
+                            showAddTaskView.toggle()
+                        }
                     }, label: {
                         Text("Cancel")
                     })
+                    .alert("Save Task", isPresented: $shouldShowDirtyCheckAlert) {
+                        Button(action: {
+                            showAddTaskView.toggle()
+                        }, label: {
+                            Text("Cancel")
+                        })
+                        Button(action: {
+                            addTask()
+                        }, label: {
+                            Text("Save")
+                        })
+                    } message: {
+                        Text("Would you like to save task?")
+                    }
+
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
@@ -50,6 +77,7 @@ struct AddTaskView: View {
                     }, label: {
                         Text("Add")
                     })
+                    .disabled(newTask.name.isEmpty)
                 }
             }
         }
@@ -57,5 +85,6 @@ struct AddTaskView: View {
 }
 
 #Preview {
-    AddTaskView(viewModel: TaskViewModel(), showAddTaskView: .constant(false), refreshTaskList: .constant(false))
+    AddTaskView(viewModel: TaskViewModelFactory.createTaskViewModelFactory(), showAddTaskView: .constant(false),
+                refreshTaskList: .constant(false))
 }

@@ -12,6 +12,7 @@ struct TaskDetailView: View {
     @Binding var showTaskDetailView: Bool
     @Binding var selectedTask: Task
     @Binding var refreshTaskList: Bool
+    @State private var shouldShowDeleteAlert: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -34,15 +35,31 @@ struct TaskDetailView: View {
                 
                 Section {
                     Button {
-                        if (viewModel.deleteTask(taskID: selectedTask.id)) {
-                            showTaskDetailView.toggle()
-                            refreshTaskList.toggle()
-                        }
+                        shouldShowDeleteAlert.toggle()
                     } label: {
                         Text("Delete")
                             .fontWeight(.bold)
                             .foregroundStyle(.red)
                             .frame(maxWidth: .infinity)
+                    }.alert("Delete Task?", isPresented: $shouldShowDeleteAlert) {
+                        Button {
+                            showTaskDetailView.toggle()
+                        } label: {
+                            Text("No")
+                        }
+                        
+                        Button(role: .destructive) {
+                            if (viewModel.deleteTask(task: selectedTask)) {
+                                showTaskDetailView.toggle()
+                                refreshTaskList.toggle()
+                            }
+
+                        } label: {
+                            Text("Yes")
+                        }
+
+                    } message: {
+                        Text("Would you like to delete the task \(selectedTask.name)?")
                     }
 
                 }
@@ -65,6 +82,7 @@ struct TaskDetailView: View {
                     }, label: {
                         Text("Update")
                     })
+                    .disabled(selectedTask.name.isEmpty)
                 }
             }
         }
@@ -72,7 +90,7 @@ struct TaskDetailView: View {
 }
 
 #Preview {
-    TaskDetailView(viewModel: TaskViewModel(), 
+    TaskDetailView(viewModel: TaskViewModelFactory.createTaskViewModelFactory(), 
                    showTaskDetailView: .constant(false),
-                   selectedTask: .constant(Task.createMockTasks().first!), refreshTaskList: .constant(false))
+                   selectedTask: .constant(Task.createEmptyTask()), refreshTaskList: .constant(false))
 }

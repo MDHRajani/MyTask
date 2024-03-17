@@ -8,45 +8,27 @@
 import Foundation
 
 final class TaskViewModel: ObservableObject {
-    
     @Published var tasks: [Task] = []
+    private let taskRepository: TaskRepositoryImplementation
     
-    private var tempTasks = Task.createMockTasks()
+    init(taskRepository: TaskRepositoryImplementation) {
+        self.taskRepository = taskRepository
+    }
     
-    func getTask(isActive: Bool) {
-        tasks = tempTasks.filter({ $0.isCompleted == !isActive})
+    
+    func getTask(isCompleted: Bool) {
+        self.tasks = taskRepository.getTask(isCompleted: !isCompleted)
     }
     
     func addNewTask(task: Task) -> Bool {
-        
-        let taskID = Int.random(in: 4...100)
-        let newTask = Task(id: taskID,
-                           name: task.name,
-                           description: task.description,
-                           finishDate: task.finishDate,
-                           isCompleted: false)
-        tempTasks.append(newTask)
-        return true
+        return taskRepository.add(task: task)
     }
     
     func updateTask(task: Task) -> Bool {
-        if let index = tempTasks.firstIndex(where: { $0.id == task.id }) {
-            var taskToUpdate = tempTasks[index]
-            taskToUpdate.name = task.name
-            taskToUpdate.description = task.description
-            taskToUpdate.finishDate = task.finishDate
-            taskToUpdate.isCompleted = task.isCompleted
-            tempTasks[index] = taskToUpdate
-            return true
-        }
-        return false
+        return taskRepository.update(task: task)
     }
     
-    func deleteTask(taskID: Int) -> Bool {
-        if let index = tempTasks.firstIndex(where: { $0.id == taskID }) {
-            tempTasks.remove(at: index)
-            return true
-        }
-        return false
+    func deleteTask(task: Task) -> Bool {
+        return taskRepository.deleteTask(task: task)
     }
 }
